@@ -44,7 +44,7 @@ The system includes:
 ## 📁 Project Structure
 
 ```
-arfa mam/
+Canser/
 │
 ├── models/               # Saved trained models
 │   └── best_model.pth
