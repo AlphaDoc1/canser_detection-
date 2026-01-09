@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Data files (exclude from repository)
+data/
+*.bmp
+*.jpg
+*.jpeg
+*.png
+*.zip
+
+# Model files (optional - uncomment if you don't want to push models)
+# models/
+# *.pth
+# *.pkl
+# *.h5
+
+# Output files
+outputs/
+proof/proof_heatmaps/
+proof/proof_metrics/
+proof/proof_predictions/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Documentation
+*.docx
+*.doc
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Streamlit
+.streamlit/
+
