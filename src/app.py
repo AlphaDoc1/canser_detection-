@@ -71,46 +71,58 @@ with st.sidebar:
 uploaded_file = st.file_uploader("Upload Image", type=['png','jpg','jpeg','bmp'])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption='Uploaded Image', width=300)
+    try:
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption='Uploaded Image', width=300)
 
-    input_tensor = transform(image).unsqueeze(0).to(device)
-    
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        probs = F.softmax(outputs, dim=1)[0]
-        pred = torch.argmax(probs).item()
-        conf = probs[pred].item()
+        # Show loading indicator
+        with st.spinner("Processing image..."):
+            input_tensor = transform(image).unsqueeze(0).to(device)
+            
+            with torch.no_grad():
+                outputs = model(input_tensor)
+                probs = F.softmax(outputs, dim=1)[0]
+                pred = torch.argmax(probs).item()
+                conf = probs[pred].item()
 
-    label = "Cancerous (ALL)" if pred == 1 else "Non-Cancerous (HEM)"
-    prob_hem = probs[0].item()
-    prob_all = probs[1].item()
-    
-    # Prediction display
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("### Prediction")
-        if pred == 1:
-            st.success(f"**{label}**")
-        else:
-            st.info(f"**{label}**")
-    
-    with col2:
-        st.write("### Confidence")
-        st.metric("", f"{conf*100:.2f}%")
-    
-    # Probability breakdown
-    st.write("### Probability Breakdown")
-    prob_col1, prob_col2 = st.columns(2)
-    with prob_col1:
-        st.progress(prob_hem, text=f"Non-Cancerous (HEM): {prob_hem*100:.2f}%")
-    with prob_col2:
-        st.progress(prob_all, text=f"Cancerous (ALL): {prob_all*100:.2f}%")
+        label = "Cancerous (ALL)" if pred == 1 else "Non-Cancerous (HEM)"
+        prob_hem = probs[0].item()
+        prob_all = probs[1].item()
+        
+        # Prediction display
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("### Prediction")
+            if pred == 1:
+                st.success(f"**{label}**")
+            else:
+                st.info(f"**{label}**")
+        
+        with col2:
+            st.write("### Confidence")
+            st.metric("Confidence Score", f"{conf*100:.2f}%", label_visibility="hidden")
+        
+        # Probability breakdown
+        st.write("### Probability Breakdown")
+        prob_col1, prob_col2 = st.columns(2)
+        with prob_col1:
+            st.progress(prob_hem, text=f"Non-Cancerous (HEM): {prob_hem*100:.2f}%")
+        with prob_col2:
+            st.progress(prob_all, text=f"Cancerous (ALL): {prob_all*100:.2f}%")
 
-    # GradCAM
-    cam, _ = gradcam.generate(input_tensor)
-    orig = np.array(image.resize((224,224)))
-    heatmap = apply_heatmap(orig, cam)
+        # GradCAM
+        with st.spinner("Generating Grad-CAM heatmap..."):
+            try:
+                cam, _ = gradcam.generate(input_tensor)
+                orig = np.array(image.resize((224, 224)))
+                heatmap = apply_heatmap(orig, cam)
 
-    st.write("### Grad-CAM Heatmap")
-    st.image(heatmap, width=300)
+                st.write("### Grad-CAM Heatmap")
+                st.image(heatmap, width=300, caption="Visual explanation of model prediction")
+            except Exception as e:
+                st.warning(f"Could not generate heatmap: {str(e)}")
+                st.info("Prediction completed successfully, but heatmap generation failed.")
+    
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
+        st.info("Please make sure you uploaded a valid image file.")
